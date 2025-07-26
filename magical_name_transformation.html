@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amina → Lucinde: Magical Symphony</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            color: #e8e8e8;
+            overflow-x: hidden;
+        }
+
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s ease-in-out infinite alternate;
+        }
+
+        .constellation-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .constellation-line.active {
+            animation: drawLine 1.5s ease-out forwards;
+        }
+
+        .aurora {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                rgba(64, 224, 208, 0.1), 
+                rgba(255, 0, 150, 0.1), 
+                rgba(0, 255, 255, 0.1));
+            pointer-events: none;
+            opacity: 0;
+            z-index: 2;
+            animation: auroraFlow 8s ease-in-out infinite;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 36px;
+            font-weight: 300;
+            color: #f8f9fa;
+            margin-bottom: 60px;
+            letter-spacing: 4px;
+            opacity: 0;
+            text-shadow: 0 0 20px rgba(248, 249, 250, 0.5);
+            animation: titleMagic 2s ease-out 0.5s forwards;
+        }
+
+        .names-container {
+            position: relative;
+            height: 120px;
+            margin-bottom: 40px;
+            perspective: 1000px;
+        }
+
+        .name-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: absolute;
+            width: 100%;
+            transition: all 1.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .amina-row {
+            top: 0;
+            opacity: 1;
+        }
+
+        .lucinde-row {
+            top: 0;
+            opacity: 0;
+            transform: translateY(30px) rotateX(-20deg);
+        }
+
+        .letter {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            font-size: 32px;
+            font-weight: 400;
+            color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .letter::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .letter::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .letter:hover {
+            transform: translateY(-5px) rotateX(10deg);
+            box-shadow: 
+                0 15px 40px rgba(0,0,0,0.4),
+                0 0 30px rgba(255,255,255,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .letter:hover::before {
+            opacity: 1;
+        }
+
+        .letter:hover::after {
+            width: 100px;
+            height: 100px;
+            opacity: 0;
+        }
+
+        .letter.activated {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-8px) rotateX(15deg) scale(1.05);
+            box-shadow: 
+                0 20px 50px rgba(102, 126, 234, 0.4),
+                0 0 50px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            animation: letterPulse 0.8s ease-in-out;
+        }
+
+        .letter.domino-fall {
+            animation: dominoSpectacular 1.2s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+
+        .lucinde-letter {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            color: #2d3436;
+            border-color: #ffeaa7;
+            opacity: 0;
+            transform: translateY(50px) rotateX(-30deg) scale(0.8);
+        }
+
+        .lucinde-letter.reveal {
+            animation: lucindeSpectacular 1.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+
+        .floating-adjective {
+            position: absolute;
+            font-size: 18px;
+            font-weight: 300;
+            font-style: italic;
+            color: #667eea;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 100;
+            text-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
+            font-family: 'Playfair Display', serif;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .floating-adjective.animate {
+            animation: poeticFloat 4s ease-out forwards;
+        }
+
+        .magic-orb {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #667eea, #764ba2);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+        }
+
+        .magic-orb.float {
+            animation: orbDance 3s ease-in-out forwards;
+        }
+
+        .energy-wave {
+            position: absolute;
+            border: 2px solid rgba(102, 126, 234, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .energy-wave.expand {
+            animation: waveExpansion 2s ease-out forwards;
+        }
+
+        .mystical-smoke {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        .mystical-smoke.rise {
+            animation: smokeRise 4s ease-out forwards;
+        }
+
+        .rune-symbol {
+            position: absolute;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+            opacity: 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .rune-symbol.manifest {
+            animation: runeManifest 3s ease-out forwards;
+        }
+
+        .celestial-spiral {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .celestial-spiral.spin {
+            animation: spiralDance 3s linear forwards;
+        }
+
+        .progress-constellation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .progress-star {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            position: relative;
+        }
+
+        .progress-star.lit {
+            background: radial-gradient(circle, #667eea, #764ba2);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+            transform: scale(1.5);
+        }
+
+        .progress-star.lit::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            border-radius: 50%;
+            animation: starPulse 2s ease-in-out infinite;
+        }
+
+        .status-text {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 30px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            opacity: 0;
+            transition: all 0.8s ease;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .status-text.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, rgba(116, 185, 255, 0.8), rgba(9, 132, 227, 0.8));
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(116, 185, 255, 0.3);
+            margin-top: 40px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(116, 185, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Magical Animations */
+        @keyframes titleMagic {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.8);
+                filter: blur(10px);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translateY(-10px) scale(1.1);
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes letterPulse {
+            0%, 100% { transform: translateY(-8px) rotateX(15deg) scale(1.05); }
+            25% { transform: translateY(-12px) rotateX(20deg) scale(1.1) rotateZ(2deg); }
+            50% { transform: translateY(-15px) rotateX(25deg) scale(1.15) rotateZ(-2deg); }
+            75% { transform: translateY(-12px) rotateX(20deg) scale(1.1) rotateZ(1deg); }
+        }
+
+        @keyframes dominoSpectacular {
+            0% {
+                transform: translateY(-8px) rotateX(15deg) scale(1.05);
+                opacity: 1;
+            }
+            25% {
+                transform: translateY(-5px) rotateX(25deg) rotateY(10deg) scale(1.1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateY(20px) rotateX(60deg) rotateY(20deg) scale(0.9);
+                opacity: 0.6;
+            }
+            75% {
+                transform: translateY(60px) rotateX(80deg) rotateY(30deg) scale(0.7);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(120px) rotateX(90deg) rotateY(45deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes lucindeSpectacular {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) rotateX(-30deg) scale(0.8);
+                filter: blur(5px);
+            }
+            30% {
+                opacity: 0.6;
+                transform: translateY(20px) rotateX(-15deg) scale(0.9);
+                filter: blur(3px);
+            }
+            60% {
+                opacity: 0.9;
+                transform: translateY(-10px) rotateX(5deg) scale(1.1);
+                filter: blur(1px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0deg) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes poeticFloat {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.8) rotate(-5deg);
+                filter: blur(3px);
+            }
+            20% {
+                opacity: 1;
+                transform: translateY(-30px) scale(1) rotate(0deg);
+                filter: blur(0);
+            }
+            80% {
+                opacity: 1;
+                transform: translateY(-80px) scale(1.05) rotate(2deg);
+                filter: blur(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-120px) scale(0.9) rotate(5deg);
+                filter: blur(2px);
+            }
+        }
+
+        @keyframes orbDance {
+            0% {
+                opacity: 1;
+                transform: translateY(0) translateX(0) scale(1);
+            }
+            25% {
+                opacity: 1;
+                transform: translateY(-40px) translateX(20px) scale(1.2);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translateY(-80px) translateX(-10px) scale(0.8);
+            }
+            75% {
+                opacity: 0.6;
+                transform: translateY(-120px) translateX(30px) scale(1.1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-160px) translateX(-20px) scale(0.5);
+            }
+        }
+
+        @keyframes waveExpansion {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+            50% {
+                width: 200px;
+                height: 200px;
+                opacity: 0.6;
+            }
+            100% {
+                width: 400px;
+                height: 400px;
+                opacity: 0;
+            }
+        }
+
+        @keyframes smokeRise {
+            0% {
+                opacity: 0.8;
+                transform: translateY(0) translateX(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-200px) translateX(50px) scale(3);
+                filter: blur(10px);
+            }
+        }
+
+        @keyframes runeManifest {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8) rotate(360deg);
+            }
+        }
+
+        @keyframes spiralDance {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5) rotate(360deg);
+            }
+        }
+
+        @keyframes starPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes drawLine {
+            0% { width: 0; opacity: 0; }
+            50% { opacity: 1; }
+            100% { width: 100%; opacity: 0.3; }
+        }
+
+        @keyframes auroraFlow {
+            0%, 100% { opacity: 0; transform: translateX(-100px); }
+            50% { opacity: 0.3; transform: translateX(100px); }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 480px) {
+            .letter {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+            
+            .title {
+                font-size: 28px;
+                margin-bottom: 40px;
+                letter-spacing: 2px;
+            }
+            
+            .name-row {
+                gap: 12px;
+            }
+
+            .names-container {
+                height: 100px;
+            }
+
+            .floating-adjective {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Starfield Background -->
+    <div class="starfield" id="starfield"></div>
+    
+    <!-- Aurora Background -->
+    <div class="aurora"></div>
+    
+    <div class="container">
+        <h1 class="title">✦ A M I N A ✦</h1>
+        
+        <div class="names-container">
+            <div class="name-row amina-row" id="aminaRow">
+                <button class="letter" data-letter="A" data-index="0">A</button>
+                <button class="letter" data-letter="M" data-index="1">M</button>
+                <button class="letter" data-letter="I" data-index="2">I</button>
+                <button class="letter" data-letter="N" data-index="3">N</button>
+                <button class="letter" data-letter="A" data-index="4">A</button>
+            </div>
+            
+            <div class="name-row lucinde-row" id="lucindeRow">
+                <button class="letter lucinde-letter" data-letter="L">L</button>
+                <button class="letter lucinde-letter" data-letter="U">U</button>
+                <button class="letter lucinde-letter" data-letter="C">C</button>
+                <button class="letter lucinde-letter" data-letter="I">I</button>
+                <button class="letter lucinde-letter" data-letter="N">N</button>
+                <button class="letter lucinde-letter" data-letter="D">D</button>
+                <button class="letter lucinde-letter" data-letter="E">E</button>
+            </div>
+        </div>
+
+        <div class="progress-constellation" id="progressConstellation">
+            <div class="progress-star"></div>
+            <div class="progress-star"></div>
+            <div class="progress-star"></div>
+            <div class="progress-star"></div>
+            <div class="progress-star"></div>
+        </div>
+        
+        <div class="status-text" id="statusText">Touch each star to awaken the celestial magic</div>
+        
+        <button class="reset-btn" onclick="resetMagicalSymphony()" id="resetBtn" style="opacity: 0;">✦ Conjure Anew ✦</button>
+    </div>
+
+    <script>
+        let activatedLetters = new Set();
+        let isTransforming = false;
+        let transformationComplete = false;
+
+        // Enhanced adjectives with mystical qualities
+        const letterAdjectives = {
+            0: ['Astounding', 'Artistic', 'Ambitious', 'Authentic', 'Angelic'], // A
+            1: ['Magnificent', 'Mystical', 'Masterful', 'Mesmerizing', 'Muslim'], // M
+            2: ['Inspiring', 'Imaginative', 'Intuitive', 'Innovative', 'Illuminating'], // I
+            3: ['Noble', 'Natural', 'Nurturing', 'Nuanced', 'Numinous'], // N
+            4: ['Amazing', 'Awakened', 'Astral', 'Artistic', 'Aligned'] // A
+        };
+
+        const runeSymbols = ['✧', '✦', '✩', '✪', '✫', '✬', '✭', '✮', '✯', '✰'];
+
+        const aminaLetters = document.querySelectorAll('.amina-row .letter');
+        const lucindeLetters = document.querySelectorAll('.lucinde-letter');
+        const progressStars = document.querySelectorAll('.progress-star');
+        const statusText = document.getElementById('statusText');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Initialize magical environment
+        initializeMagicalEnvironment();
+
+        // Add click handlers to Amina letters
+        aminaLetters.forEach((letter, index) => {
+            letter.addEventListener('click', () => activateLetter(letter, index));
+        });
+
+        function initializeMagicalEnvironment() {
+            createStarfield();
+            createConstellationLines();
+            setTimeout(() => {
+                statusText.classList.add('show');
+            }, 2000);
+        }
+
+        function createStarfield() {
+            const starfield = document.getElementById('starfield');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                starfield.appendChild(star);
+            }
+        }
+
+        function createConstellationLines() {
+            // Create invisible constellation lines that will activate
+            for (let i = 0; i < 4; i++) {
+                const line = document.createElement('div');
+                line.className = 'constellation-line';
+                line.id = `constellation-${i}`;
+                line.style.left = '20%';
+                line.style.top = (30 + i * 15) + '%';
+                line.style.width = '60%';
+                line.style.transformOrigin = 'left center';
+                line.style.transform = `rotate(${Math.random() * 30 - 15}deg)`;
+                document.body.appendChild(line);
+            }
+        }
+
+        function activateLetter(letterElement, index) {
+            if (activatedLetters.has(index) || isTransforming) return;
+
+            // Mark as activated
+            activatedLetters.add(index);
+            letterElement.classList.add('activated');
+            
+            // Light up progress star
+            progressStars[index].classList.add('lit');
+            
+            // Activate constellation line
+            const constellationLine = document.getElementById(`constellation-${index % 4}`);
+            if (constellationLine) {
+                constellationLine.classList.add('active');
+            }
+            
+            // Create spectacular magical effects
+            createSpectacularMagic(letterElement, index);
+            
+            // Check if transformation should begin
+            if (activatedLetters.size === aminaLetters.length && !isTransforming) {
+                setTimeout(() => startMagicalSymphony(), 1200);
+            } else {
+                updateMysticalStatus();
+            }
+        }
+
+        function createSpectacularMagic(element, letterIndex) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // Create energy wave
+            createEnergyWave(centerX, centerY);
+            
+            // Create celestial spiral
+            createCelestialSpiral(centerX, centerY);
+            
+            // Create mystical orbs
+            createMysticalOrbs(centerX, centerY);
+            
+            // Create floating adjectives with enhanced effects
+            createEnhancedAdjectives(centerX, centerY, letterIndex);
+            
+            // Create rune manifestation
+            createRuneManifest(centerX, centerY);
+            
+            // Create mystical smoke
+            createMysticalSmoke(centerX, centerY);
+        }
+
+        function createEnergyWave(centerX, centerY) {
+            const wave = document.createElement('div');
+            wave.className = 'energy-wave';
+            wave.style.left = centerX + 'px';
+            wave.style.top = centerY + 'px';
+            wave.style.transform = 'translate(-50%, -50%)';
+            document.body.appendChild(wave);
+
+            setTimeout(() => wave.classList.add('expand'), 50);
+            setTimeout(() => wave.remove(), 2000);
+        }
+
+        function createCelestialSpiral(centerX, centerY) {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const spiral = document.createElement('div');
+                    spiral.className = 'celestial-spiral';
+                    spiral.style.left = centerX + 'px';
+                    spiral.style.top = centerY + 'px';
+                    spiral.style.transform = 'translate(-50%, -50%)';
+                    spiral.style.borderColor = `rgba(${102 + i * 20}, ${126 + i * 20}, 234, ${0.5 - i * 0.1})`;
+                    document.body.appendChild(spiral);
+
+                    setTimeout(() => spiral.classList.add('spin'), 100);
+                    setTimeout(() => spiral.remove(), 3000);
+                }, i * 300);
+            }
+        }
+
+        function createMysticalOrbs(centerX, centerY) {
+            for (let i = 0; i < 12; i++) {
+                setTimeout(() => {
+                    const orb = document.createElement('div');
+                    orb.className = 'magic-orb';
+                    
+                    const angle = (i * 30) * Math.PI / 180;
+                    const distance = 60 + Math.random() * 40;
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance;
+                    
+                    orb.style.left = x + 'px';
+                    orb.style.top = y + 'px';
+                    
+                    const colors = ['#667eea', '#764ba2', '#ffeaa7', '#fab1a0', '#74b9ff'];
+                    orb.style.background = `radial-gradient(circle, ${colors[i % colors.length]}, transparent)`;
+                    
+                    document.body.appendChild(orb);
+                    
+                    setTimeout(() => orb.classList.add('float'), 50);
+                    setTimeout(() => orb.remove(), 3000);
+                }, i * 80);
+            }
+        }
+
+        function createEnhancedAdjectives(centerX, centerY, letterIndex) {
+            const adjectives = letterAdjectives[letterIndex];
+            
+            adjectives.forEach((adjective, index) => {
+                setTimeout(() => {
+                    const adjectiveElement = document.createElement('div');
+                    adjectiveElement.className = 'floating-adjective';
+                    adjectiveElement.textContent = adjective;
+                    
+                    const angle = (index * 72) + (Math.random() - 0.5) * 40;
+                    const distance = 100 + Math.random() * 80;
+                    const x = centerX + Math.cos(angle * Math.PI / 180) * distance;
+                    const y = centerY + Math.sin(angle * Math.PI / 180) * distance;
+                    
+                    adjectiveElement.style.left = x + 'px';
+                    adjectiveElement.style.top = y + 'px';
+                    
+                    // Add magical glow based on letter
+                    const glowColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+                    adjectiveElement.style.textShadow = `0 0 20px ${glowColors[letterIndex]}`;
+                    
+                    document.body.appendChild(adjectiveElement);
+                    
+                    setTimeout(() => {
+                        adjectiveElement.classList.add('animate');
+                    }, 100);
+                    
+                    setTimeout(() => {
+                        adjectiveElement.remove();
+                    }, 4000);
+                }, index * 300);
+            });
+        }
+
+        function createRuneManifest(centerX, centerY) {
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const rune = document.createElement('div');
+                    rune.className = 'rune-symbol';
+                    rune.textContent = runeSymbols[Math.floor(Math.random() * runeSymbols.length)];
+                    
+                    const angle = i * 60;
+                    const distance = 80;
+                    const x = centerX + Math.cos(angle * Math.PI / 180) * distance;
+                    const y = centerY + Math.sin(angle * Math.PI / 180) * distance;
+                    
+                    rune.style.left = x + 'px';
+                    rune.style.top = y + 'px';
+                    rune.style.transform = 'translate(-50%, -50%)';
+                    
+                    document.body.appendChild(rune);
+                    
+                    setTimeout(() => rune.classList.add('manifest'), 100);
+                    setTimeout(() => rune.remove(), 3000);
+                }, i * 150);
+            }
+        }
+
+        function createMysticalSmoke(centerX, centerY) {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const smoke = document.createElement('div');
+                    smoke.className = 'mystical-smoke';
+                    smoke.style.left = centerX + (Math.random() - 0.5) * 60 + 'px';
+                    smoke.style.top = centerY + (Math.random() - 0.5) * 60 + 'px';
+                    
+                    document.body.appendChild(smoke);
+                    
+                    setTimeout(() => smoke.classList.add('rise'), 50);
+                    setTimeout(() => smoke.remove(), 4000);
+                }, i * 100);
+            }
+        }
+
+        function startMagicalSymphony() {
+            isTransforming = true;
+            statusText.textContent = '✦ The celestial transformation unfolds ✦';
+            statusText.classList.add('show');
+
+            // Create cosmic background effects
+            createCosmicStorm();
+            
+            // Enhanced domino effect with spectacular visuals
+            aminaLetters.forEach((letter, index) => {
+                setTimeout(() => {
+                    letter.classList.add('domino-fall');
+                    createLetterDissolution(letter);
+                }, index * 200);
+            });
+
+            // Begin Lucinde revelation with cosmic fanfare
+            setTimeout(() => {
+                revealLucindeWithCelestialFanfare();
+            }, aminaLetters.length * 200 + 600);
+        }
+
+        function createCosmicStorm() {
+            // Create multiple aurora waves
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const aurora = document.createElement('div');
+                    aurora.style.position = 'fixed';
+                    aurora.style.top = '0';
+                    aurora.style.left = '0';
+                    aurora.style.width = '100%';
+                    aurora.style.height = '100%';
+                    aurora.style.background = `linear-gradient(${45 + i * 30}deg, 
+                        rgba(${64 + i * 40}, ${224 - i * 30}, ${208 + i * 10}, 0.2), 
+                        rgba(${255 - i * 50}, ${0 + i * 30}, ${150 + i * 20}, 0.2))`;
+                    aurora.style.pointerEvents = 'none';
+                    aurora.style.opacity = '0';
+                    aurora.style.zIndex = '2';
+                    aurora.style.animation = 'auroraFlow 3s ease-in-out forwards';
+                    document.body.appendChild(aurora);
+                    
+                    setTimeout(() => aurora.remove(), 3000);
+                }, i * 400);
+            }
+        }
+
+        function createLetterDissolution(letterElement) {
+            const rect = letterElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // Create particle explosion
+            for (let i = 0; i < 25; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.style.position = 'absolute';
+                    particle.style.width = '3px';
+                    particle.style.height = '3px';
+                    particle.style.background = '#667eea';
+                    particle.style.borderRadius = '50%';
+                    particle.style.left = centerX + 'px';
+                    particle.style.top = centerY + 'px';
+                    particle.style.pointerEvents = 'none';
+                    particle.style.boxShadow = '0 0 10px #667eea';
+                    
+                    const angle = (i * 14.4) * Math.PI / 180;
+                    const distance = Math.random() * 150 + 50;
+                    const endX = centerX + Math.cos(angle) * distance;
+                    const endY = centerY + Math.sin(angle) * distance;
+                    
+                    particle.style.animation = `orbDance 2s ease-out forwards`;
+                    particle.style.setProperty('--endX', endX + 'px');
+                    particle.style.setProperty('--endY', endY + 'px');
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 2000);
+                }, i * 20);
+            }
+        }
+
+        function revealLucindeWithCelestialFanfare() {
+            const aminaRow = document.getElementById('aminaRow');
+            const lucindeRow = document.getElementById('lucindeRow');
+
+            // Hide Amina with cosmic effect
+            aminaRow.style.opacity = '0';
+            aminaRow.style.transform = 'translateY(-50px) rotateX(-30deg) scale(0.8)';
+            aminaRow.style.filter = 'blur(10px)';
+
+            // Create cosmic portal effect
+            createCosmicPortal();
+
+            setTimeout(() => {
+                // Show Lucinde with celestial emergence
+                lucindeRow.style.opacity = '1';
+                lucindeRow.style.transform = 'translateY(0) rotateX(0deg)';
+
+                // Reveal each Lucinde letter with cosmic effects
+                lucindeLetters.forEach((letter, index) => {
+                    setTimeout(() => {
+                        letter.classList.add('reveal');
+                        createCelestialBirth(letter);
+                    }, index * 180);
+                });
+
+                // Final cosmic celebration
+                setTimeout(() => {
+                    createCosmicCelebration();
+                    statusText.textContent = '✦ LUCINDE emerges from the cosmic dance of AMINA ✦';
+                    resetBtn.style.opacity = '1';
+                    transformationComplete = true;
+                }, lucindeLetters.length * 180 + 800);
+            }, 500);
+        }
+
+        function createCosmicPortal() {
+            const portal = document.createElement('div');
+            portal.style.position = 'absolute';
+            portal.style.left = '50%';
+            portal.style.top = '50%';
+            portal.style.width = '200px';
+            portal.style.height = '200px';
+            portal.style.background = 'radial-gradient(circle, rgba(102, 126, 234, 0.8), transparent)';
+            portal.style.borderRadius = '50%';
+            portal.style.transform = 'translate(-50%, -50%) scale(0)';
+            portal.style.pointerEvents = 'none';
+            portal.style.zIndex = '50';
+            portal.style.animation = 'waveExpansion 2s ease-out forwards';
+            portal.style.boxShadow = '0 0 100px rgba(102, 126, 234, 0.6)';
+            document.body.appendChild(portal);
+
+            setTimeout(() => portal.remove(), 2000);
+        }
+
+        function createCelestialBirth(letterElement) {
+            const rect = letterElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // Create birth explosion
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('div');
+                    star.style.position = 'absolute';
+                    star.style.left = centerX + 'px';
+                    star.style.top = centerY + 'px';
+                    star.style.width = '4px';
+                    star.style.height = '4px';
+                    star.style.background = 'radial-gradient(circle, #ffeaa7, #fab1a0)';
+                    star.style.borderRadius = '50%';
+                    star.style.pointerEvents = 'none';
+                    star.style.boxShadow = '0 0 15px #ffeaa7';
+                    star.style.animation = 'orbDance 2.5s ease-out forwards';
+                    
+                    document.body.appendChild(star);
+                    setTimeout(() => star.remove(), 2500);
+                }, i * 50);
+            }
+        }
+
+        function createCosmicCelebration() {
+            // Create celebration across the entire screen
+            for (let i = 0; i < 60; i++) {
+                setTimeout(() => {
+                    const celebrationParticle = document.createElement('div');
+                    celebrationParticle.style.position = 'absolute';
+                    celebrationParticle.style.left = Math.random() * window.innerWidth + 'px';
+                    celebrationParticle.style.top = Math.random() * window.innerHeight + 'px';
+                    celebrationParticle.style.width = (Math.random() * 6 + 2) + 'px';
+                    celebrationParticle.style.height = celebrationParticle.style.width;
+                    
+                    const celebrationColors = ['#667eea', '#764ba2', '#ffeaa7', '#fab1a0', '#74b9ff', '#fd79a8'];
+                    celebrationParticle.style.background = `radial-gradient(circle, ${celebrationColors[Math.floor(Math.random() * celebrationColors.length)]}, transparent)`;
+                    celebrationParticle.style.borderRadius = '50%';
+                    celebrationParticle.style.pointerEvents = 'none';
+                    celebrationParticle.style.boxShadow = `0 0 20px ${celebrationColors[Math.floor(Math.random() * celebrationColors.length)]}`;
+                    celebrationParticle.style.animation = 'orbDance 4s ease-out forwards';
+                    
+                    document.body.appendChild(celebrationParticle);
+                    setTimeout(() => celebrationParticle.remove(), 4000);
+                }, i * 100);
+            }
+
+            // Create cosmic text effects
+            createCosmicTextEffects();
+        }
+
+        function createCosmicTextEffects() {
+            const cosmicWords = ['✦ Magic ✦', '✧ Wonder ✧', '✩ Dreams ✩', '✪ Celestial ✪'];
+            
+            cosmicWords.forEach((word, index) => {
+                setTimeout(() => {
+                    const wordElement = document.createElement('div');
+                    wordElement.style.position = 'absolute';
+                    wordElement.style.left = Math.random() * (window.innerWidth - 200) + 100 + 'px';
+                    wordElement.style.top = Math.random() * (window.innerHeight - 100) + 50 + 'px';
+                    wordElement.style.fontSize = '24px';
+                    wordElement.style.color = '#f8f9fa';
+                    wordElement.style.fontFamily = 'Playfair Display, serif';
+                    wordElement.style.fontWeight = '300';
+                    wordElement.style.textShadow = '0 0 30px rgba(248, 249, 250, 0.8)';
+                    wordElement.style.pointerEvents = 'none';
+                    wordElement.style.opacity = '0';
+                    wordElement.style.animation = 'poeticFloat 3s ease-out forwards';
+                    wordElement.textContent = word;
+                    
+                    document.body.appendChild(wordElement);
+                    setTimeout(() => wordElement.remove(), 3000);
+                }, index * 500);
+            });
+        }
+
+        function updateMysticalStatus() {
+            const remaining = aminaLetters.length - activatedLetters.size;
+            if (remaining > 0) {
+                statusText.textContent = `✦ ${remaining} celestial star${remaining > 1 ? 's' : ''} await${remaining === 1 ? 's' : ''} your touch ✦`;
+                statusText.classList.add('show');
+            }
+        }
+
+        function resetMagicalSymphony() {
+            // Reset all magical states
+            activatedLetters.clear();
+            isTransforming = false;
+            transformationComplete = false;
+
+            // Reset Amina letters with cosmic effect
+            aminaLetters.forEach(letter => {
+                letter.classList.remove('activated', 'domino-fall');
+            });
+
+            // Reset Lucinde letters
+            lucindeLetters.forEach(letter => {
+                letter.classList.remove('reveal');
+            });
+
+            // Reset progress stars
+            progressStars.forEach(star => {
+                star.classList.remove('lit');
+            });
+
+            // Reset constellation lines
+            document.querySelectorAll('.constellation-line').forEach(line => {
+                line.classList.remove('active');
+            });
+
+            // Reset rows with magical transition
+            const aminaRow = document.getElementById('aminaRow');
+            const lucindeRow = document.getElementById('lucindeRow');
+            
+            aminaRow.style.opacity = '1';
+            aminaRow.style.transform = 'translateY(0) rotateX(0deg) scale(1)';
+            aminaRow.style.filter = 'blur(0)';
+            lucindeRow.style.opacity = '0';
+            lucindeRow.style.transform = 'translateY(30px) rotateX(-20deg)';
+
+            // Reset UI
+            statusText.textContent = '✦ Touch each star to awaken the celestial magic ✦';
+            statusText.classList.add('show');
+            resetBtn.style.opacity = '0';
+
+            // Create cosmic reset effect
+            createCosmicReset();
+        }
+
+        function createCosmicReset() {
+            // Create swirling reset particles
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const resetParticle = document.createElement('div');
+                    resetParticle.style.position = 'absolute';
+                    resetParticle.style.left = window.innerWidth / 2 + 'px';
+                    resetParticle.style.top = window.innerHeight / 2 + 'px';
+                    resetParticle.style.width = '4px';
+                    resetParticle.style.height = '4px';
+                    
+                    const resetColors = ['#74b9ff', '#0984e3', '#667eea', '#764ba2'];
+                    resetParticle.style.background = `radial-gradient(circle, ${resetColors[i % resetColors.length]}, transparent)`;
+                    resetParticle.style.borderRadius = '50%';
+                    resetParticle.style.pointerEvents = 'none';
+                    resetParticle.style.boxShadow = `0 0 15px ${resetColors[i % resetColors.length]}`;
+                    resetParticle.style.animation = 'spiralDance 3s ease-out forwards';
+                    
+                    document.body.appendChild(resetParticle);
+                    setTimeout(() => resetParticle.remove(), 3000);
+                }, i * 80);
+            }
+        }
+    </script>
+</body>
+</html>
